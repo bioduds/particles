@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: aulas_db
+    environment:
+      POSTGRES_DB: aulas_db
+      POSTGRES_USER: aulas_user
+      POSTGRES_PASSWORD: aulas_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aulas_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aulas_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: aulas_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aulas_network
+
+  web:
+    build: .
+    container_name: aulas_web
+    command: >
+      sh -c "python manage.py migrate &&
+             gunicorn project.wsgi:application --bind 0.0.0.0:8000 --workers 4"
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      DEBUG: "True"
+      SECRET_KEY: "django-insecure-dev-key-change-in-production"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,web,nginx"
+      DB_ENGINE: django.db.backends.postgresql
+      DB_NAME: aulas_db
+      DB_USER: aulas_user
+      DB_PASSWORD: aulas_password
+      DB_HOST: db
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - aulas_network
+
+  nginx:
+    build: ./nginx
+    container_name: aulas_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - web
+    networks:
+      - aulas_network
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+
+networks:
+  aulas_network:
+    driver: bridge
