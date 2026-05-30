@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Aulas{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1>Bem-vindo, {{ user.get_full_name|default:user.username }}! 👋</h1>
+        <p class="text-muted">
+            {% if user.is_teacher %}
+                Professor - Gerencie suas disciplinas e tarefas
+            {% elif user.is_student %}
+                Estudante - Acompanhe suas tarefas e notas
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+{% if user.is_student %}
+    <!-- Dashboard para Estudantes -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Minhas Tarefas</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        {% if tasks %}
+            {% for task in tasks %}
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ task.title }}</h5>
+                            <p class="card-text text-muted">{{ task.subject.name }}</p>
+                            <p class="card-text">{{ task.description|truncatewords:20 }}</p>
+
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    Vencimento: <strong>{{ task.due_date|date:"d/m/Y H:i" }}</strong>
+                                </small>
+                            </div>
+
+                            {% with submission=task.submissions.first %}
+                                {% if submission %}
+                                    <div class="alert alert-info py-2 mb-3">
+                                        <strong>Status:</strong> {{ submission.get_status_display }}
+                                        {% if submission.grade %}
+                                            <br>
+                                            <strong>Nota:</strong> {{ submission.grade.score }}/{{ task.max_score }}
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-warning py-2 mb-3">
+                                        Você ainda não entregou esta tarefa
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
+
+                            <a href="{% url 'task_detail' task.id %}" class="btn btn-sm btn-primary">
+                                Ver Detalhes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-md-12">
+                <div class="alert alert-info">
+                    Nenhuma tarefa disponível no momento.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+{% elif user.is_teacher %}
+    <!-- Dashboard para Professores -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Minhas Disciplinas</h2>
+            <a href="{% url 'subject_create' %}" class="btn btn-success">+ Criar Nova Disciplina</a>
+        </div>
+    </div>
+
+    <div class="row">
+        {% if subjects %}
+            {% for subject in subjects %}
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ subject.name }}</h5>
+                            <p class="card-text text-muted">{{ subject.description }}</p>
+
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <strong>{{ subject.students_count }}</strong> alunos inscritos
+                                </small>
+                            </div>
+
+                            <div class="mb-3">
+                                <strong>{{ subject.tasks.count }}</strong> tarefas criadas
+                            </div>
+
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'subject_detail' subject.id %}" class="btn btn-sm btn-primary">
+                                    Ver Detalhes
+                                </a>
+                                <a href="{% url 'task_create' subject.id %}" class="btn btn-sm btn-success">
+                                    + Tarefa
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-md-12">
+                <div class="alert alert-info">
+                    Você ainda não criou nenhuma disciplina.
+                    <a href="{% url 'subject_create' %}">Clique aqui para criar uma</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <hr class="my-5">
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Submissões Aguardando Avaliação</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        {% if pending_submissions %}
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tarefa</th>
+                                <th>Aluno</th>
+                                <th>Entregue em</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for submission in pending_submissions %}
+                                <tr>
+                                    <td>{{ submission.task.title }}</td>
+                                    <td>{{ submission.student.get_full_name|default:submission.student.username }}</td>
+                                    <td>{{ submission.submission_date|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <a href="{% url 'submission_grade' submission.id %}" class="btn btn-sm btn-warning">
+                                            Avaliar
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-md-12">
+                <div class="alert alert-success">
+                    Não há submissões aguardando avaliação. Parabéns! 🎉
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

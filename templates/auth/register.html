@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar - Aulas{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body p-5">
+                <h1 class="card-title text-center mb-4">Registrar Nova Conta</h1>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">Usuário</label>
+                        <input type="text" class="form-control {% if form.username.errors %}is-invalid{% endif %}"
+                               id="id_username" name="username" required>
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback">{{ form.username.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_email" class="form-label">Email</label>
+                        <input type="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                               id="id_email" name="email" required>
+                        {% if form.email.errors %}
+                            <div class="invalid-feedback">{{ form.email.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_first_name" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="id_first_name" name="first_name">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_last_name" class="form-label">Sobrenome</label>
+                        <input type="text" class="form-control" id="id_last_name" name="last_name">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_role" class="form-label">Tipo de Usuário</label>
+                        <select class="form-select" id="id_role" name="role" required>
+                            <option value="">Selecione...</option>
+                            <option value="student">Estudante</option>
+                            <option value="teacher">Professor</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">Senha</label>
+                        <input type="password" class="form-control {% if form.password.errors %}is-invalid{% endif %}"
+                               id="id_password" name="password" required>
+                        {% if form.password.errors %}
+                            <div class="invalid-feedback">{{ form.password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Registrar</button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <p>Já tem conta? <a href="{% url 'login' %}">Faça login aqui</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

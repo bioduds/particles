@@ -17,12 +17,25 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
+from views import login_view, register_view, logout_view, dashboard_view, task_detail_view, comment_create_view, profile_view
 
 urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
+
+    # API
     path('api/', include('users.urls')),
     path('api/', include('classes.urls')),
     path('api/', include('tasks.urls')),
     path('api/auth/token/', obtain_auth_token, name='api_token_auth'),
     path('api-auth/', include('rest_framework.urls')),
+
+    # Templates/Web
+    path('', dashboard_view, name='dashboard'),
+    path('login/', login_view, name='login'),
+    path('register/', register_view, name='register'),
+    path('logout/', logout_view, name='logout'),
+    path('profile/', profile_view, name='profile'),
+    path('tasks/<int:task_id>/', task_detail_view, name='task_detail'),
+    path('comments/create/', comment_create_view, name='comment_create'),
 ]

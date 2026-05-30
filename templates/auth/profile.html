@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Meu Perfil - Aulas{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">Meu Perfil</h1>
+
+                <div class="row mt-4">
+                    <div class="col-md-3 text-center">
+                        {% if user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}"
+                                 class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center"
+                                 style="width: 150px; height: 150px; font-size: 3rem;">
+                                👤
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-9">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">NOME</label>
+                            <p class="h5">{{ user.get_full_name|default:"Não informado" }}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted">USUÁRIO</label>
+                            <p class="h5">{{ user.username }}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted">EMAIL</label>
+                            <p class="h5">{{ user.email }}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted">TIPO DE USUÁRIO</label>
+                            <p>
+                                <span class="badge badge-{{ user.role }}">{{ user.get_role_display }}</span>
+                            </p>
+                        </div>
+
+                        {% if user.bio %}
+                            <div class="mb-3">
+                                <label class="form-label text-muted">BIO</label>
+                                <p>{{ user.bio }}</p>
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted">MEMBRO DESDE</label>
+                            <p>{{ user.created_at|date:"d/m/Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="d-grid gap-2">
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">← Voltar ao Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
